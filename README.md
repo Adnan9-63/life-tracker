@@ -1,16 +1,26 @@
-# React + Vite
+# Life Tracker by ADNAN
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A highly visual, offline-first Progressive Web App (PWA) designed to track life progress through the lens of *Memento Mori*, while managing weekly objectives and daily core habits. 
 
-Currently, two official plugins are available:
+Built with a clean, dark-mode (zinc and indigo) UI and engineered to work completely without an internet connection.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Live URL
+**[https://life-tracker-byadnan.netlify.app/]**
+---> just download the app from your browser from this link and start using it .
 
-## React Compiler
+## ✨ Core Features
+* **The Life Grid:** A visual representation of a 60-year lifespan (Age 0 to 60). Weeks are color-coded based on user-logged scores (1-5 scale), with the current week highlighted to anchor the user in the present.
+* **The Log (Action Center):** A weekly tracking interface to set a primary objective, score the week, and check off up to 10 customized daily habits.
+* **Insights Dashboard:** Real-time metrics calculating your current weekly streak, average score, and total weeks logged.
+* **100% Offline Capable (PWA):** Powered by Vite PWA, the app installs directly to mobile/desktop home screens and functions entirely without Wi-Fi or cellular data.
+* **Privacy-First Storage & Backups:** All data (birthdate, habits, scores) is stored locally on the device using `localStorage`. Includes manual Import/Export features to safely transfer data between devices.Import/Export file happens in json format.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🛠️ Tech Stack
+* **Framework:** React 18
+* **Build Tool:** Vite
+* **Styling:** Tailwind CSS
+* **Icons:** Lucide React
+* **Offline Routing:** `vite-plugin-pwa`
 
-## Expanding the ESLint configuration 
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Developed by Adnan, a computer science engineering student at Bakhtiyarpur College of Engineering.
+This application was conceptualized and shipped as a milestone project during a rigorous 300-day technical and personal development challenge.
