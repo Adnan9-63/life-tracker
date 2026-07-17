@@ -22,5 +22,5 @@ Built with a clean, dark-mode (zinc and indigo) UI and engineered to work comple
 * **Icons:** Lucide React
 * **Offline Routing:** `vite-plugin-pwa`
 
-Developed by Adnan, a computer science engineering student at Bakhtiyarpur College of Engineering.
+Developed by Adnan
 This application was conceptualized and shipped as a milestone project during a rigorous 300-day technical and personal development challenge.
