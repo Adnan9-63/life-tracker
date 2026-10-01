@@ -4,6 +4,10 @@ A highly visual, offline-first Progressive Web App (PWA) designed to track life 
 
 Built with a clean, dark-mode (zinc and indigo) UI, backed by Supabase for accounts and cloud sync, and engineered to keep working without an internet connection.
 
+<br>
+<img src=".github/assets/tracker-preview.png" alt="Life Tracker Grid Preview" width="100%"/>
+<br>
+
 ## ✨ Core Features
 
 - **The Life Grid** — a visual representation of a 60-year lifespan (Age 0 to 60), color-coded by weekly score.
