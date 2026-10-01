@@ -1,6 +1,6 @@
 
-import React, { useState, useRef } from 'react';
-import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2, ArrowUp } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useLifeData } from './hooks/useLifeData';
 
@@ -36,7 +36,25 @@ export default function Tracker() {
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   const showMessage = (text, type = 'info') => {
     setMessage({ text, type });
@@ -690,6 +708,21 @@ export default function Tracker() {
           </div>
         </div>
       )}
+
+      {/* Floating Scroll to Top Button */}
+      <button
+        type="button"
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        title="Scroll to top"
+        className={`fixed bottom-6 right-6 z-30 p-3 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/10 hover:border-indigo-500/40 shadow-xl backdrop-blur-md transition-all duration-300 transform ${
+          showScrollTop
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        } hover:scale-110 hover:shadow-[0_0_20px_rgba(99,102,241,0.25)] active:scale-95 flex items-center justify-center group`}
+      >
+        <ArrowUp className="w-5 h-5 transition-transform duration-200 group-hover:-translate-y-0.5" />
+      </button>
     </div>
   );
 }
