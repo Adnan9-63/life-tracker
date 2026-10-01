@@ -1,8 +1,9 @@
 
 import React, { useState, useRef } from 'react';
-import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import { X, Copy, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2 } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useLifeData } from './hooks/useLifeData';
+import { copyExportDataToClipboard, serializeExportData } from './lib/exportData';
 
 const TOTAL_YEARS = 61; // Age 0 to 60
 const WEEKS_PER_YEAR = 52;
@@ -161,9 +162,16 @@ export default function Tracker() {
     };
   };
 
+  const getExportData = () => serializeExportData({
+    lifeData,
+    yearData,
+    habitLabels,
+    birthDate,
+    userName,
+  });
+
   const handleExport = () => {
-    const exportPayload = { data: lifeData, yearData: yearData, habits: habitLabels, birthDate: birthDate, userName: userName };
-    const dataStr = JSON.stringify(exportPayload);
+    const dataStr = getExportData();
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -171,6 +179,15 @@ export default function Tracker() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     URL.revokeObjectURL(url);
     showMessage("Data exported securely.", "success");
+  };
+
+  const handleCopyExport = async () => {
+    try {
+      await copyExportDataToClipboard(navigator.clipboard, getExportData());
+      showMessage("Export data copied to clipboard.", "success");
+    } catch {
+      showMessage("Unable to copy export data. Check clipboard permissions.", "error");
+    }
   };
 
   const handleImport = (event) => {
@@ -268,6 +285,9 @@ export default function Tracker() {
           <div className="w-px h-6 bg-white/10 mx-1"></div>
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
             <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={handleCopyExport} aria-label="Copy export data to clipboard" title="Copy export data to clipboard" className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
+            <Copy className="w-4 h-4" /> <span className="hidden sm:inline">Copy</span>
           </button>
           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
             <Upload className="w-4 h-4" /> <span className="hidden sm:inline">Import</span>
