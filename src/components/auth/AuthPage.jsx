@@ -191,21 +191,29 @@ export default function AuthPage() {
             Continue with Google
           </button>
 
-          <p className="text-center text-xs text-zinc-500 pt-1">
-            {mode === 'login' && (
-              <>Don't have an account?{' '}
-                <button onClick={() => { setMode('signup'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Sign up</button>
-              </>
-            )}
-            {mode === 'signup' && (
-              <>Already have an account?{' '}
-                <button onClick={() => { setMode('login'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Log in</button>
-              </>
-            )}
-            {mode === 'forgot' && (
-              <button onClick={() => { setMode('login'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Back to login</button>
-            )}
-          </p>
+          {mode !== 'forgot' && (
+            <p className="text-center text-xs text-zinc-500 pt-1">
+              {mode === 'login' && (
+                <>Don't have an account?{' '}
+                  <button onClick={() => { setMode('signup'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Sign up</button>
+                </>
+              )}
+              {mode === 'signup' && (
+                <>Already have an account?{' '}
+                  <button onClick={() => { setMode('login'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Log in</button>
+                </>
+              )}
+            </p>
+          )}
+
+          {mode === 'forgot' && (
+            <button
+              onClick={() => { setMode('login'); resetFeedback() }}
+              className="w-full flex items-center justify-center gap-2 bg-transparent border border-white/10 hover:bg-white/5 text-zinc-200 py-3 rounded-xl font-semibold transition-all"
+            >
+              Back to login
+            </button>
+          )}
         </div>
       </div>
     </div>
