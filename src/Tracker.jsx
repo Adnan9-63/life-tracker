@@ -428,13 +428,13 @@ export default function Tracker() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto pt-10 pb-20 px-4 flex justify-center animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto pt-4 sm:pt-10 pb-20 px-2 sm:px-4 flex justify-center animate-in fade-in duration-200">
           <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden h-max">
-            <div className="flex items-center justify-between p-5 border-b border-white/5">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/5">
               <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2.5"><Settings className="w-5 h-5 text-zinc-400" /> Settings</h2>
               <button onClick={() => setShowSettings(false)} className="p-1.5 text-zinc-500 hover:text-zinc-200 bg-white/5 hover:bg-white/10 rounded-full transition-colors"><X className="w-4 h-4" /></button>
             </div>
-            <div className="p-6 space-y-8">
+            <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
               <div className="space-y-3">
                 <h3 className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest">Identity</h3>
                 <p className="text-xs text-zinc-400">Personalize your tracker's title.</p>
@@ -453,14 +453,14 @@ export default function Tracker() {
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full min-w-0 bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                 />
               </div>
               <div className="space-y-4">
                 <h3 className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest">Daily Disciplines</h3>
                 <p className="text-xs text-zinc-400">Define up to 10 core habits. Empty fields remain hidden.</p>
                 {habitLabels.map((label, i) => (
-                  <div key={i} className="flex items-center gap-3 group">
+                  <div key={i} className="flex items-center gap-2 sm:gap-3 group">
                     <span className="text-xs font-medium text-zinc-600 w-4 group-focus-within:text-indigo-400 transition-colors">{i + 1}.</span>
                     <input
                       type="text"
@@ -471,13 +471,13 @@ export default function Tracker() {
                         setHabitLabels(newLabels);
                       }}
                       placeholder={`e.g. ${i === 0 ? 'Workout' : 'Reading'}`}
-                      className="flex-1 bg-black/20 border border-transparent hover:border-white/5 rounded-xl p-2.5 text-sm text-zinc-200 focus:outline-none focus:bg-black/40 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-700"
+                      className="flex-1 min-w-0 bg-black/20 border border-transparent hover:border-white/5 rounded-xl p-2.5 text-sm text-zinc-200 focus:outline-none focus:bg-black/40 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-700"
                     />
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-5 border-t border-white/5 bg-zinc-900/50">
+            <div className="p-4 sm:p-5 border-t border-white/5 bg-zinc-900/50">
               <button onClick={() => setShowSettings(false)} className="w-full bg-white text-zinc-900 hover:bg-zinc-200 py-3 rounded-xl font-semibold transition-colors">Done</button>
             </div>
           </div>
