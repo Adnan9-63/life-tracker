@@ -27,7 +27,7 @@ export default function Tracker() {
   const {
     lifeData, yearData, habitLabels, birthDate, userName,
     setLifeData, setYearData, setHabitLabels, setBirthDate, setUserName,
-    replaceAll, syncStatus,
+    replaceAll, clearLocalCache, syncStatus,
   } = useLifeData(user.id);
 
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -41,6 +41,11 @@ export default function Tracker() {
   const showMessage = (text, type = 'info') => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleClearLocalData = async () => {
+    if (!confirm('Clear all locally cached data on this device? Your cloud data stays safe and will be re-downloaded.')) return;
+    if (await clearLocalCache() === false) showMessage('Could not sync to the cloud. Local data was kept.', 'error');
   };
 
   const handleWeekClick = (index) => {
@@ -477,7 +482,8 @@ export default function Tracker() {
                 ))}
               </div>
             </div>
-            <div className="p-5 border-t border-white/5 bg-zinc-900/50">
+            <div className="p-5 border-t border-white/5 bg-zinc-900/50 space-y-3">
+              <button onClick={handleClearLocalData} className="w-full flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 py-3 rounded-xl font-semibold transition-colors"><Trash2 className="w-4 h-4" /> Clear All Local Data</button>
               <button onClick={() => setShowSettings(false)} className="w-full bg-white text-zinc-900 hover:bg-zinc-200 py-3 rounded-xl font-semibold transition-colors">Done</button>
             </div>
           </div>
