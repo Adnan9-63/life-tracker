@@ -94,11 +94,12 @@ export default function Tracker() {
   const currentWeekIndex = getCurrentWeekIndex();
 
   const getDayLabel = (weekIndex, dayIndex) => {
-    const defaultDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    if (!birthDate) return defaultDays[dayIndex];
+    // Jan 1, 2024 was a Monday, so this gives the localized Monday..Sunday name
+    const fallback = new Date(2024, 0, 1 + dayIndex).toLocaleDateString(undefined, { weekday: 'long' });
+    if (!birthDate) return fallback;
 
     const parts = birthDate.split('-');
-    if (parts.length !== 3) return defaultDays[dayIndex];
+    if (parts.length !== 3) return fallback;
 
     const [year, month, day] = parts.map(Number);
     const date = new Date(year, month - 1, day + (weekIndex * 7) + dayIndex);
