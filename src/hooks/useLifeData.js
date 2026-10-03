@@ -88,8 +88,10 @@ export function useLifeData(userId) {
         .upsert({ user_id: userId, ...nextRecord, updated_at: new Date().toISOString() })
       if (error) throw error
       setSyncStatus('synced')
+      return true
     } catch {
       setSyncStatus('offline')
+      return false
     }
   }, [userId])
 
@@ -143,6 +145,15 @@ export function useLifeData(userId) {
     })
   }, [scheduleSave])
 
+  // Flush any pending edit to the cloud, drop the local cache, then reload
+  // so the app re-fetches a fresh copy from Supabase.
+  const clearLocalCache = useCallback(async () => {
+    clearTimeout(debounceRef.current)
+    if (!(await persist(latestRecordRef.current))) return false
+    localStorage.removeItem(cacheKey(userId))
+    window.location.reload()
+  }, [userId, persist])
+
   return {
     lifeData: record.life_data,
     yearData: record.year_data,
@@ -155,6 +166,7 @@ export function useLifeData(userId) {
     setBirthDate,
     setUserName,
     replaceAll,
+    clearLocalCache,
     loading,
     syncStatus,
   }
