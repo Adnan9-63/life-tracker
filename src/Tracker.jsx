@@ -388,6 +388,14 @@ export default function Tracker() {
 
             <div className="p-6 pt-4 space-y-6">
 
+              {getStats().totalScoredWeeks === 0 && (
+                <div className="flex flex-col items-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 p-5 text-center" role="status">
+                  <BarChart2 className="mb-3 h-7 w-7 text-indigo-300" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-zinc-100">No data yet!</h3>
+                  <p className="mt-1 text-sm text-zinc-400">Score your first week to see your stats here.</p>
+                </div>
+              )}
+
               <div className="bg-black/20 p-5 rounded-xl border border-white/5">
                 <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-6">Score Distribution</h3>
                 <div className="flex items-end justify-between h-32 gap-3">
