@@ -58,4 +58,8 @@ Add the same two environment variables in *Site settings → Environment variabl
 
 ---
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, checks and the pull request workflow.
+
 Developed by Adnan — conceptualized and shipped as a milestone project during a rigorous 300-day technical and personal development challenge.
