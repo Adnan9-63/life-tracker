@@ -11,7 +11,7 @@ export default defineConfig({
       manifest: {
         name: 'Life Tracker',
         short_name: 'LifeTracker',
-        description: 'Track my 300-day fitness and tech challenge',
+        description: 'A visual, offline-first Memento Mori lifespan tracker and weekly journal.',
         theme_color: '#000000',
         icons: [
           {
