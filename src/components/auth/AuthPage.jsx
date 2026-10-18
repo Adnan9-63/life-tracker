@@ -225,7 +225,12 @@ export default function AuthPage() {
               </>
             )}
             {mode === 'forgot' && (
-              <button onClick={() => { setMode('login'); resetFeedback() }} className="text-indigo-400 hover:text-indigo-300 font-medium">Back to login</button>
+              <button
+                onClick={() => { setMode('login'); resetFeedback() }}
+                className="w-full flex items-center justify-center gap-2 border border-indigo-500/40 text-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-200 py-2.5 rounded-xl font-medium transition-all"
+              >
+                Back to login
+              </button>
             )}
           </p>
         </div>
