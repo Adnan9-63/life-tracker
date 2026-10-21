@@ -141,24 +141,35 @@ export default function Tracker() {
     let longestStreak = 0; let tempStreak = 0;
     let scoreDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    for (let i = 0; i < TOTAL_WEEKS; i++) {
-      const week = lifeData[i];
-      if (week && week.weeklyScore > 0) {
-        totalScoredWeeks++;
-        scoreSum += week.weeklyScore;
-        tempStreak++;
-        scoreDistribution[week.weeklyScore]++;
+  for (let i = 0; i < TOTAL_WEEKS; i++) {
+    const week = lifeData[i];
 
-        if (tempStreak > longestStreak) longestStreak = tempStreak;
-        if (week.milestone && week.milestone.trim() !== '') milestonesCount++;
-        week.days.forEach(day => {
-          if (day.subgoals) totalSubgoalsDone += day.subgoals.filter(sg => sg.done).length;
-          if (day.habits) totalHabitsDone += day.habits.filter(Boolean).length;
-        });
-      } else {
-        tempStreak = 0;
+    if (week) {
+      if (week.milestone && week.milestone.trim() !== '') {
+        milestonesCount++;
       }
+
+      week.days?.forEach(day => {
+        if (day.subgoals) {
+          totalSubgoalsDone += day.subgoals.filter(sg => sg.done).length;
+        }
+        if (day.habits) {
+          totalHabitsDone += day.habits.filter(Boolean).length;
+        }
+      });
     }
+
+    if (week && week.weeklyScore > 0) {
+      totalScoredWeeks++;
+      scoreSum += week.weeklyScore;
+      tempStreak++;
+      scoreDistribution[week.weeklyScore]++;
+
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
 
     let calcCurrentStreak = 0;
     let startIdx = currentWeekIndex >= 0 ? currentWeekIndex : TOTAL_WEEKS - 1;
