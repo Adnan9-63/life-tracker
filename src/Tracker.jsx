@@ -150,13 +150,16 @@ export default function Tracker() {
         scoreDistribution[week.weeklyScore]++;
 
         if (tempStreak > longestStreak) longestStreak = tempStreak;
+      } else {
+        tempStreak = 0;
+      }
+
+      if (week) {
         if (week.milestone && week.milestone.trim() !== '') milestonesCount++;
         week.days.forEach(day => {
           if (day.subgoals) totalSubgoalsDone += day.subgoals.filter(sg => sg.done).length;
           if (day.habits) totalHabitsDone += day.habits.filter(Boolean).length;
         });
-      } else {
-        tempStreak = 0;
       }
     }
 
