@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2, ArrowUp } from 'lucide-react';
+import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2, ArrowUp, Locate } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useLifeData } from './hooks/useLifeData';
 
@@ -38,6 +38,7 @@ export default function Tracker() {
   const [message, setMessage] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const fileInputRef = useRef(null);
+  const currentWeekRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -54,6 +55,24 @@ export default function Tracker() {
       top: 0,
       behavior: 'smooth',
     });
+  };
+
+  const jumpToCurrentWeek = () => {
+    if (!birthDate) {
+      showMessage("Please set your birth date in Settings first.", "info");
+      return;
+    }
+    if (currentWeekIndex < 0 || currentWeekIndex >= TOTAL_WEEKS) {
+      showMessage("Current week is outside the 60-year timeline.", "info");
+      return;
+    }
+    if (currentWeekRef.current) {
+      currentWeekRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      });
+    }
   };
 
   const showMessage = (text, type = 'info') => {
@@ -277,6 +296,15 @@ export default function Tracker() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={jumpToCurrentWeek}
+            className="p-2.5 text-zinc-400 hover:text-indigo-400 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/30 rounded-xl transition-all"
+            title="Jump to current week"
+            aria-label="Jump to current week"
+          >
+            <Locate className="w-4 h-4" />
+          </button>
           <button onClick={() => setShowStats(true)} className="p-2.5 text-zinc-400 hover:text-zinc-100 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all" title="Statistics">
             <BarChart2 className="w-4 h-4" />
           </button>
@@ -335,6 +363,8 @@ export default function Tracker() {
                     return (
                       <div
                         key={i}
+                        ref={isCurrentWeek ? currentWeekRef : null}
+                        id={isCurrentWeek ? 'current-week-cell' : undefined}
                         onClick={() => handleWeekClick(i)}
                         title={`Age ${age}, Week ${weekOfYear}${hasMilestone ? ' ⭐ ' + lifeData[i].milestone : ''}`}
                         className={`
