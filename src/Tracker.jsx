@@ -22,6 +22,8 @@ const getDefaultWeek = () => ({
   days: Array(7).fill(null).map(getDefaultDay),
 });
 
+const countWords = (text) => text.trim().split(/\s+/).filter(Boolean).length;
+
 export default function Tracker() {
   const { user, signOut } = useAuth();
   const {
@@ -698,6 +700,9 @@ export default function Tracker() {
                   placeholder="Analyze your execution. What went well? What needs adjustment?"
                   className="w-full bg-black/20 border border-white/5 hover:border-white/10 rounded-2xl p-5 text-zinc-300 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 resize-none h-36 leading-relaxed transition-all placeholder:text-zinc-600"
                 />
+                <p className="text-right text-[11px] text-zinc-500">
+                  Words: {countWords(editData.weeklyReview || '')} · Characters: {(editData.weeklyReview || '').length}
+                </p>
               </div>
 
             </div>
