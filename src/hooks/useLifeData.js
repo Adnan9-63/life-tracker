@@ -32,7 +32,13 @@ export function useLifeData(userId) {
     const load = async () => {
       setLoading(true)
       const cached = localStorage.getItem(cacheKey(userId))
-      const cachedRecord = cached ? JSON.parse(cached) : null
+      let cachedRecord = null
+      try {
+        cachedRecord = cached ? JSON.parse(cached) : null
+      } catch {
+        // Corrupted cache — discard it and rely on the remote data instead.
+        localStorage.removeItem(cacheKey(userId))
+      }
 
       try {
         const { data, error } = await supabase
