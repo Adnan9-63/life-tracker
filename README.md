@@ -5,17 +5,32 @@ A highly visual, offline-first Progressive Web App (PWA) designed to track life 
 Built with a clean, dark-mode (zinc and indigo) UI, backed by Supabase for accounts and cloud sync, and engineered to keep working without an internet connection.
 
 <br>
-<img src=".github/assets/tracker-preview.png" alt="Life Tracker Grid Preview" width="100%"/>
+<img src=".github/assets/tracker-preview.png" alt="Life Tracker — the Life Grid, one square per week from age 0 to 60" width="100%"/>
 <br>
 
 ## ✨ Core Features
 
-- **The Life Grid** — a visual representation of a 60-year lifespan (Age 0 to 60), color-coded by weekly score.
-- **The Log (Action Center)** — weekly objective, score, and up to 10 customizable daily habits.
-- **Insights Dashboard** — streaks, average score, and totals.
+- **The Life Grid** — a visual representation of a 60-year lifespan (Age 0 to 60, 52 weeks per row), with each week color-coded by its score and a review column for every year.
+- **The Log (Action Center)** — click any week to set its primary objective, pin milestones to the timeline, and run daily operations: a 1–5 score, tactical subgoals, and up to 10 customizable habits per day.
+- **Insights Dashboard** — score distribution, weeks scored, average score, current and longest streaks, goals met, and habits built.
 - **Accounts + Cloud Sync** — email/password or Google sign-in; data lives in Postgres (Supabase), not just on one device.
 - **Offline-first** — installable PWA (`vite-plugin-pwa`); changes made offline are cached locally and synced automatically once back online.
 - **Import/Export** — manual JSON backup/restore, in addition to automatic cloud sync.
+
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td align="center" width="60%">
+      <img src=".github/assets/log-preview.png" alt="Weekly log — primary objective, milestone log, and daily operations" width="100%"/>
+      <br><sub><b>The Log</b> — weekly objective, milestones, daily scores, subgoals and habits</sub>
+    </td>
+    <td align="center" width="40%">
+      <img src=".github/assets/stats-preview.png" alt="Detailed Stats — score distribution, streaks, goals and habits" width="100%"/>
+      <br><sub><b>Insights</b> — score distribution, streaks, goals met and habits built</sub>
+    </td>
+  </tr>
+</table>
 
 ## 🛠️ Tech Stack
 
