@@ -53,6 +53,24 @@ export default function Tracker() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      if (showSettings) {
+        setShowSettings(false);
+      } else if (showStats) {
+        setShowStats(false);
+      } else if (selectedWeek !== null) {
+        setSelectedWeek(null);
+      } else if (selectedYear !== null) {
+        setSelectedYear(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showSettings, showStats, selectedWeek, selectedYear]);
+
   const scrollToTop = () => {
     window.scrollTo({
       top: 0,
