@@ -1,8 +1,9 @@
 
-import React, { useState, useRef } from 'react';
-import { X, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Copy, Download, Upload, Save, Calendar, Check, Settings, Plus, Trash2, Star, BarChart2, BookOpen, Flame, LogOut, Cloud, CloudOff, Loader2, ArrowUp, Locate } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { useLifeData } from './hooks/useLifeData';
+import { copyExportDataToClipboard, serializeExportData } from './lib/exportData';
 
 const TOTAL_YEARS = 61; // Age 0 to 60
 const WEEKS_PER_YEAR = 52;
@@ -22,12 +23,14 @@ const getDefaultWeek = () => ({
   days: Array(7).fill(null).map(getDefaultDay),
 });
 
+const countWords = (text) => text.trim().split(/\s+/).filter(Boolean).length;
+
 export default function Tracker() {
   const { user, signOut } = useAuth();
   const {
     lifeData, yearData, habitLabels, birthDate, userName,
     setLifeData, setYearData, setHabitLabels, setBirthDate, setUserName,
-    replaceAll, syncStatus,
+    replaceAll, clearLocalCache, syncStatus,
   } = useLifeData(user.id);
 
   const [selectedWeek, setSelectedWeek] = useState(null);
@@ -36,11 +39,71 @@ export default function Tracker() {
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const fileInputRef = useRef(null);
+  const currentWeekRef = useRef(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      if (showSettings) {
+        setShowSettings(false);
+      } else if (showStats) {
+        setShowStats(false);
+      } else if (selectedWeek !== null) {
+        setSelectedWeek(null);
+      } else if (selectedYear !== null) {
+        setSelectedYear(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showSettings, showStats, selectedWeek, selectedYear]);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  const jumpToCurrentWeek = () => {
+    if (!birthDate) {
+      showMessage("Please set your birth date in Settings first.", "info");
+      return;
+    }
+    if (currentWeekIndex < 0 || currentWeekIndex >= TOTAL_WEEKS) {
+      showMessage("Current week is outside the 60-year timeline.", "info");
+      return;
+    }
+    if (currentWeekRef.current) {
+      currentWeekRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center',
+      });
+    }
+  };
 
   const showMessage = (text, type = 'info') => {
     setMessage({ text, type });
     setTimeout(() => setMessage(null), 3000);
+  };
+
+  const handleClearLocalData = async () => {
+    if (!confirm('Clear all locally cached data on this device? Your cloud data stays safe and will be re-downloaded.')) return;
+    if (await clearLocalCache() === false) showMessage('Could not sync to the cloud. Local data was kept.', 'error');
   };
 
   const handleWeekClick = (index) => {
@@ -94,11 +157,12 @@ export default function Tracker() {
   const currentWeekIndex = getCurrentWeekIndex();
 
   const getDayLabel = (weekIndex, dayIndex) => {
-    const defaultDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    if (!birthDate) return defaultDays[dayIndex];
+    // Jan 1, 2024 was a Monday, so this gives the localized Monday..Sunday name
+    const fallback = new Date(2024, 0, 1 + dayIndex).toLocaleDateString(undefined, { weekday: 'long' });
+    if (!birthDate) return fallback;
 
     const parts = birthDate.split('-');
-    if (parts.length !== 3) return defaultDays[dayIndex];
+    if (parts.length !== 3) return fallback;
 
     const [year, month, day] = parts.map(Number);
     const date = new Date(year, month - 1, day + (weekIndex * 7) + dayIndex);
@@ -123,24 +187,35 @@ export default function Tracker() {
     let longestStreak = 0; let tempStreak = 0;
     let scoreDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
 
-    for (let i = 0; i < TOTAL_WEEKS; i++) {
-      const week = lifeData[i];
-      if (week && week.weeklyScore > 0) {
-        totalScoredWeeks++;
-        scoreSum += week.weeklyScore;
-        tempStreak++;
-        scoreDistribution[week.weeklyScore]++;
+  for (let i = 0; i < TOTAL_WEEKS; i++) {
+    const week = lifeData[i];
 
-        if (tempStreak > longestStreak) longestStreak = tempStreak;
-        if (week.milestone && week.milestone.trim() !== '') milestonesCount++;
-        week.days.forEach(day => {
-          if (day.subgoals) totalSubgoalsDone += day.subgoals.filter(sg => sg.done).length;
-          if (day.habits) totalHabitsDone += day.habits.filter(Boolean).length;
-        });
-      } else {
-        tempStreak = 0;
+    if (week) {
+      if (week.milestone && week.milestone.trim() !== '') {
+        milestonesCount++;
       }
+
+      week.days?.forEach(day => {
+        if (day.subgoals) {
+          totalSubgoalsDone += day.subgoals.filter(sg => sg.done).length;
+        }
+        if (day.habits) {
+          totalHabitsDone += day.habits.filter(Boolean).length;
+        }
+      });
     }
+
+    if (week && week.weeklyScore > 0) {
+      totalScoredWeeks++;
+      scoreSum += week.weeklyScore;
+      tempStreak++;
+      scoreDistribution[week.weeklyScore]++;
+
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+    } else {
+      tempStreak = 0;
+    }
+  }
 
     let calcCurrentStreak = 0;
     let startIdx = currentWeekIndex >= 0 ? currentWeekIndex : TOTAL_WEEKS - 1;
@@ -161,9 +236,16 @@ export default function Tracker() {
     };
   };
 
+  const getExportData = () => serializeExportData({
+    lifeData,
+    yearData,
+    habitLabels,
+    birthDate,
+    userName,
+  });
+
   const handleExport = () => {
-    const exportPayload = { data: lifeData, yearData: yearData, habits: habitLabels, birthDate: birthDate, userName: userName };
-    const dataStr = JSON.stringify(exportPayload);
+    const dataStr = getExportData();
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
@@ -171,6 +253,15 @@ export default function Tracker() {
     document.body.appendChild(link); link.click(); document.body.removeChild(link);
     URL.revokeObjectURL(url);
     showMessage("Data exported securely.", "success");
+  };
+
+  const handleCopyExport = async () => {
+    try {
+      await copyExportDataToClipboard(navigator.clipboard, getExportData());
+      showMessage("Export data copied to clipboard.", "success");
+    } catch {
+      showMessage("Unable to copy export data. Check clipboard permissions.", "error");
+    }
   };
 
   const handleImport = (event) => {
@@ -259,6 +350,15 @@ export default function Tracker() {
         </div>
 
         <div className="flex items-center gap-2.5">
+          <button
+            type="button"
+            onClick={jumpToCurrentWeek}
+            className="p-2.5 text-zinc-400 hover:text-indigo-400 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-indigo-500/30 rounded-xl transition-all"
+            title="Jump to current week"
+            aria-label="Jump to current week"
+          >
+            <Locate className="w-4 h-4" />
+          </button>
           <button onClick={() => setShowStats(true)} className="p-2.5 text-zinc-400 hover:text-zinc-100 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all" title="Statistics">
             <BarChart2 className="w-4 h-4" />
           </button>
@@ -268,6 +368,9 @@ export default function Tracker() {
           <div className="w-px h-6 bg-white/10 mx-1"></div>
           <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
             <Download className="w-4 h-4" /> <span className="hidden sm:inline">Export</span>
+          </button>
+          <button onClick={handleCopyExport} aria-label="Copy export data to clipboard" title="Copy export data to clipboard" className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
+            <Copy className="w-4 h-4" /> <span className="hidden sm:inline">Copy</span>
           </button>
           <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-300 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl transition-all">
             <Upload className="w-4 h-4" /> <span className="hidden sm:inline">Import</span>
@@ -317,6 +420,8 @@ export default function Tracker() {
                     return (
                       <div
                         key={i}
+                        ref={isCurrentWeek ? currentWeekRef : null}
+                        id={isCurrentWeek ? 'current-week-cell' : undefined}
                         onClick={() => handleWeekClick(i)}
                         title={`Age ${age}, Week ${weekOfYear}${hasMilestone ? ' ⭐ ' + lifeData[i].milestone : ''}`}
                         className={`
@@ -369,6 +474,14 @@ export default function Tracker() {
             )}
 
             <div className="p-6 pt-4 space-y-6">
+
+              {getStats().totalScoredWeeks === 0 && (
+                <div className="flex flex-col items-center rounded-xl border border-indigo-400/20 bg-indigo-500/10 p-5 text-center" role="status">
+                  <BarChart2 className="mb-3 h-7 w-7 text-indigo-300" aria-hidden="true" />
+                  <h3 className="text-sm font-semibold text-zinc-100">No data yet!</h3>
+                  <p className="mt-1 text-sm text-zinc-400">Score your first week to see your stats here.</p>
+                </div>
+              )}
 
               <div className="bg-black/20 p-5 rounded-xl border border-white/5">
                 <h3 className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-6">Score Distribution</h3>
@@ -428,13 +541,13 @@ export default function Tracker() {
 
       {/* Settings Modal */}
       {showSettings && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto pt-10 pb-20 px-4 flex justify-center animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto pt-4 sm:pt-10 pb-20 px-2 sm:px-4 flex justify-center animate-in fade-in duration-200">
           <div className="bg-zinc-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden h-max">
-            <div className="flex items-center justify-between p-5 border-b border-white/5">
+            <div className="flex items-center justify-between p-4 sm:p-5 border-b border-white/5">
               <h2 className="text-lg font-semibold text-zinc-100 flex items-center gap-2.5"><Settings className="w-5 h-5 text-zinc-400" /> Settings</h2>
               <button onClick={() => setShowSettings(false)} className="p-1.5 text-zinc-500 hover:text-zinc-200 bg-white/5 hover:bg-white/10 rounded-full transition-colors"><X className="w-4 h-4" /></button>
             </div>
-            <div className="p-6 space-y-8">
+            <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
               <div className="space-y-3">
                 <h3 className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest">Identity</h3>
                 <p className="text-xs text-zinc-400">Personalize your tracker's title.</p>
@@ -453,14 +566,14 @@ export default function Tracker() {
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                  className="w-full min-w-0 bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-zinc-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
                 />
               </div>
               <div className="space-y-4">
                 <h3 className="text-[11px] font-bold text-indigo-400 uppercase tracking-widest">Daily Disciplines</h3>
                 <p className="text-xs text-zinc-400">Define up to 10 core habits. Empty fields remain hidden.</p>
                 {habitLabels.map((label, i) => (
-                  <div key={i} className="flex items-center gap-3 group">
+                  <div key={i} className="flex items-center gap-2 sm:gap-3 group">
                     <span className="text-xs font-medium text-zinc-600 w-4 group-focus-within:text-indigo-400 transition-colors">{i + 1}.</span>
                     <input
                       type="text"
@@ -471,13 +584,14 @@ export default function Tracker() {
                         setHabitLabels(newLabels);
                       }}
                       placeholder={`e.g. ${i === 0 ? 'Workout' : 'Reading'}`}
-                      className="flex-1 bg-black/20 border border-transparent hover:border-white/5 rounded-xl p-2.5 text-sm text-zinc-200 focus:outline-none focus:bg-black/40 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-700"
+                      className="flex-1 min-w-0 bg-black/20 border border-transparent hover:border-white/5 rounded-xl p-2.5 text-sm text-zinc-200 focus:outline-none focus:bg-black/40 focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-700"
                     />
                   </div>
                 ))}
               </div>
             </div>
-            <div className="p-5 border-t border-white/5 bg-zinc-900/50">
+            <div className="p-4 sm:p-5 border-t border-white/5 bg-zinc-900/50 space-y-3">
+              <button onClick={handleClearLocalData} className="w-full flex items-center justify-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 py-3 rounded-xl font-semibold transition-colors"><Trash2 className="w-4 h-4" /> Clear All Local Data</button>
               <button onClick={() => setShowSettings(false)} className="w-full bg-white text-zinc-900 hover:bg-zinc-200 py-3 rounded-xl font-semibold transition-colors">Done</button>
             </div>
           </div>
@@ -631,6 +745,9 @@ export default function Tracker() {
                   placeholder="Analyze your execution. What went well? What needs adjustment?"
                   className="w-full bg-black/20 border border-white/5 hover:border-white/10 rounded-2xl p-5 text-zinc-300 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/50 resize-none h-36 leading-relaxed transition-all placeholder:text-zinc-600"
                 />
+                <p className="text-right text-[11px] text-zinc-500">
+                  Words: {countWords(editData.weeklyReview || '')} · Characters: {(editData.weeklyReview || '').length}
+                </p>
               </div>
 
             </div>
@@ -690,6 +807,21 @@ export default function Tracker() {
           </div>
         </div>
       )}
+
+      {/* Floating Scroll to Top Button */}
+      <button
+        type="button"
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+        title="Scroll to top"
+        className={`fixed bottom-6 right-6 z-30 p-3 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-300 hover:text-white border border-white/10 hover:border-indigo-500/40 shadow-xl backdrop-blur-md transition-all duration-300 transform ${
+          showScrollTop
+            ? 'opacity-100 translate-y-0 pointer-events-auto'
+            : 'opacity-0 translate-y-4 pointer-events-none'
+        } hover:scale-110 hover:shadow-[0_0_20px_rgba(99,102,241,0.25)] active:scale-95 flex items-center justify-center group`}
+      >
+        <ArrowUp className="w-5 h-5 transition-transform duration-200 group-hover:-translate-y-0.5" />
+      </button>
     </div>
   );
 }

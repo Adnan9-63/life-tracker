@@ -3,6 +3,16 @@ import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext(undefined)
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const clearUserCache = (userId) => {
+  if (!userId) return
+  try {
+    localStorage.removeItem(`lifeTrackerCache:${userId}`)
+  } catch (error) {
+    console.error('Failed to clear user cache on sign out:', error)
+  }
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -61,6 +71,7 @@ export function AuthProvider({ children }) {
   }
 
   const signOut = async () => {
+    clearUserCache(session?.user?.id)
     await supabase.auth.signOut()
   }
 
